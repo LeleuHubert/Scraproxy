@@ -18,6 +18,26 @@ def get_pages(token, nb, jump):
     print("Scraproxy detected ", len(pages) ," pages on ", token)
     return pages
 
+def parseLine(line):
+    elem = []
+    a = 0
+
+    print("begin of parseLine")
+
+    for l in range(0, line+1, 1):
+        if (line[l] == '>'):
+            save = 1
+        elif (save == 1):
+            print(line[l])
+            elem[a] = line[l]
+            a += 1
+        elif (line[l] == "<"):
+            save = 0
+            print(''.join(map(str, list_of_ints)))
+
+    print("end of parseLine")
+
+
 def get_data(pages,proxies):
     df = pd.DataFrame()
     param = ['td']
@@ -30,29 +50,22 @@ def get_data(pages,proxies):
             df_f = pd.DataFrame()
             if lock < 1:
                 proxy = next(proxy_pool)
+                print("\n( ", proxy, " )")
             try:
                 scraper = cloudscraper.create_scraper()
-                response = scraper.get(i,proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random},timeout=5)
+                response = scraper.get(i, proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random}, timeout=5)
                 time.sleep(random.randrange(1,4))
                 lock = 1
-
                 soup = bs4.BeautifulSoup(response.text, 'html.parser')
                 tr_box = soup.find_all("tr")
+                for l in tr_box:
+                    parseLine(l)
 
-                for par in param:
-                    l = []
-                    for el in tr_box:
-                        j = el[par]
-                        l.append(j)
-                    l = pd.DataFrame(l, columns = [par])
-                    df_f = pd.concat([df_f,l], axis = 1)
-                df = df.append(df_f, ignore_index=True)
-
-                print(df.shape, " ( ", proxy, " )")
+                print("-> work in progress (There are ", len(pages), " pages left to analyze.)")
                 pages.remove(i)
             except:
-                print("TIME OUT : ", proxy, " url : ", i)
                 lock = 0
+                print(" - fail")
 
     return df
 
@@ -65,9 +78,8 @@ def launcher(proxies):
     token2 = ["https://www.ip-adress.com/proxy-list", 1, 1]
     token3 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1] ###CAPTCHAT###
     tokens = [token1]
-    for tok in range(0, len(tokens)+1):
-        scrapper(tokens[tok][0], proxies, tokens[tok][1], tokens[tok][2]).to_csv(r'list.csv', index = False, header=True)
-    print("the file 'list.csv' was created")
+    for tok in range(0, len(tokens)):
+        scrapper(tokens[tok][0], proxies, tokens[tok][1], tokens[tok][2])
 
 def main():
     proxies = pd.read_csv('Proxy_List.txt', header = None)
