@@ -15,28 +15,15 @@ def get_pages(token, nb, jump):
         else:
             j = token
         pages.append(j)
-    print("Scraproxy detected ", len(pages) ," pages on ", token)
     return pages
 
 def parseLine(line):
-    elem = []
-    a = 0
+    stock = []
 
-    print("begin of parseLine")
-
-    for l in range(0, line+1, 1):
-        if (line[l] == '>'):
-            save = 1
-        elif (save == 1):
-            print(line[l])
-            elem[a] = line[l]
-            a += 1
-        elif (line[l] == "<"):
-            save = 0
-            print(''.join(map(str, list_of_ints)))
-
-    print("end of parseLine")
-
+    for balise in line:
+        for content in balise:
+            stock.append(content)
+    print(stock)
 
 def get_data(pages,proxies):
     df = pd.DataFrame()
@@ -50,7 +37,7 @@ def get_data(pages,proxies):
             df_f = pd.DataFrame()
             if lock < 1:
                 proxy = next(proxy_pool)
-                print("\n( ", proxy, " )")
+                print("\n( ", proxy, " ) - ", end=" ")
             try:
                 scraper = cloudscraper.create_scraper()
                 response = scraper.get(i, proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random}, timeout=5)
@@ -61,7 +48,7 @@ def get_data(pages,proxies):
                 for l in tr_box:
                     parseLine(l)
 
-                print("-> work in progress (There are ", len(pages), " pages left to analyze.)")
+                print("-> ", len(pages), " pages left to analyze.)")
                 pages.remove(i)
             except:
                 lock = 0
