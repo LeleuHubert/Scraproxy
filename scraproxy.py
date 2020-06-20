@@ -5,6 +5,7 @@ import random
 import requests
 from fake_useragent import UserAgent
 import itertools as it
+import cloudscraper
 
 def get_pages(token, nb, jump):
     pages = []
@@ -30,14 +31,24 @@ def get_data(pages,proxies):
             if lock < 1:
                 proxy = next(proxy_pool)
             try:
-                response = requests.get(i,proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random},timeout=5)
+                scraper = cloudscraper.create_scraper()
+                response = scraper.get(i,proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random},timeout=5)
                 time.sleep(random.randrange(1,4))
                 lock = 1
 
                 soup = bs4.BeautifulSoup(response.text, 'html.parser')
                 tr_box = soup.find_all("tr")
-                print("PROXY OK : élément decouvert ", len(tr_box))
-                print(tr_box)
+
+                for par in param:
+                    l = []
+                    for el in tr_box:
+                        j = el[par]
+                        l.append(j)
+                    l = pd.DataFrame(l, columns = [par])
+                    df_f = pd.concat([df_f,l], axis = 1)
+                df = df.append(df_f, ignore_index=True)
+
+                print(df.shape, " ( ", proxy, " )")
                 pages.remove(i)
             except:
                 print("TIME OUT : ", proxy, " url : ", i)
@@ -50,14 +61,13 @@ def scrapper(token, proxies, nbrpages, jump):
     return get_data(pages,proxies)
 
 def launcher(proxies):
-    token1 = ["https://www.ip-adress.com/proxy-list", 1, 1]
-    token2 = ["https://hidemy.name/en/proxy-list/?start=", 1280, 64] ###CLOUDFLARE PROTECTION###
+    token1 = ["https://hidemy.name/en/proxy-list/?start=", 1280, 64] ###CLOUDFLARE PROTECTION###
+    token2 = ["https://www.ip-adress.com/proxy-list", 1, 1]
     token3 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1] ###CAPTCHAT###
-    tokens = [token1, token2, token3]
-
+    tokens = [token1]
     for tok in range(0, len(tokens)+1):
         scrapper(tokens[tok][0], proxies, tokens[tok][1], tokens[tok][2]).to_csv(r'list.csv', index = False, header=True)
-
+    print("the file 'list.csv' was created")
 
 def main():
     proxies = pd.read_csv('Proxy_List.txt', header = None)
@@ -67,8 +77,6 @@ def main():
     print("Scraproxy is starting")
     launcher(proxies)
     print("Scraproxy's over")
-
-
 
 if __name__== "__main__":
   main()
