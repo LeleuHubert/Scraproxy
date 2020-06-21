@@ -19,11 +19,12 @@ def parseLine(line):
     rx = re.compile(r'(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)')
     stock = []
 
-    with open('list.csv', 'a') as f:
-        writer = csv.writer(f)
-        for ip in rx.findall(str(line)):
-            stock.append(ip)
-        writer.writerows(stock)
+    for ip in rx.findall(str(line)):
+        stock.append(ip)
+
+    with open('list.csv', 'a') as file:
+        for elem in stock:
+            file.write('%s\n' % elem)
 
 def connector(i, proxy, ua):
     scraper = cloudscraper.create_scraper()
@@ -51,6 +52,8 @@ def get_data(pages, proxies, pattern):
                 if len(tr_box) != 0:
                     for l in tr_box:
                         parseLine(l)
+                else:
+                    print("Error: ", len(tr_box), " ellement found")
 
                 print("- ", len(pages), " pages left")
                 pages.remove(i)
