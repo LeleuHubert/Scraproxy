@@ -16,25 +16,19 @@ def get_pages(token):
     return pages
 
 def parseLine(line):
+    rx = re.compile(r'(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)')
     stock = []
-    pattern = ["\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ "] #ip, port
-
-    for elem in line:
-        for pat in pattern:
-            result = re.match(pat, elem)
-            if result:
-                stock.append(result)
 
     with open('list.csv', 'a') as f:
         writer = csv.writer(f)
-        for cell in stock:
-            writer.writerows(cell)
+        for ip in rx.findall(str(line)):
+            stock.append(ip)
+        writer.writerows(stock)
 
 def connector(i, proxy, ua):
     scraper = cloudscraper.create_scraper()
     response = scraper.get(i, proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random}, timeout=5)
     time.sleep(random.randrange(1,4))
-    print("- step n°1 done [connector]")
     return bs4.BeautifulSoup(response.text, 'html.parser')
 
 def get_data(pages, proxies, pattern):
@@ -57,10 +51,8 @@ def get_data(pages, proxies, pattern):
                 if len(tr_box) != 0:
                     for l in tr_box:
                         parseLine(l)
-                    print("- step n°2 done [parseLine]")
 
-                print("- step n°3 done [get_data]")
-                print("### ", len(pages), " pages left ###")
+                print("- ", len(pages), " pages left")
                 pages.remove(i)
 
             except:
