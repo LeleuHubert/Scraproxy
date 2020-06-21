@@ -1,12 +1,7 @@
-import pandas as pd
-import time
-import bs4
-import random
-import requests
+import time, bs4, random, requests, cloudscraper, csv, re
 from fake_useragent import UserAgent
 import itertools as it
-import cloudscraper
-import csv
+import pandas as pd
 
 def get_pages(token):
     pages = []
@@ -22,22 +17,28 @@ def get_pages(token):
 
 def parseLine(line):
     stock = []
+    pattern = ["\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ "] #ip, port
 
-    for balise in line:
-        for content in balise:
-            stock.append(content)
-    print("- step n°3 done [", len(stock), "]")
+    for elem in line:
+        for pat in pattern:
+            result = re.match(pat, elem)
+            if result:
+                stock.append(result)
+
+    with open('list.csv', 'a') as f:
+        writer = csv.writer(f)
+        for cell in stock:
+            writer.writerows(cell)
 
 def connector(i, proxy, ua):
     scraper = cloudscraper.create_scraper()
     response = scraper.get(i, proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random}, timeout=5)
     time.sleep(random.randrange(1,4))
-    print("- connection done")
+    print("- step n°1 done [connector]")
     return bs4.BeautifulSoup(response.text, 'html.parser')
 
-def get_data(pages,proxies):
+def get_data(pages, proxies, pattern):
     df = pd.DataFrame()
-    param = ['td']
     ua = UserAgent()
     proxy_pool = it.cycle(proxies)
     lock = -1
@@ -51,31 +52,34 @@ def get_data(pages,proxies):
             try:
                 soup = connector(i, proxy, ua)
                 lock = 1
-                tr_box = soup.find_all("tr")
-                print("- step n°2 done [", len(tr_box), "]")
+                tr_box = soup.find_all(pattern[0], {"class":pattern[1]})
 
-                for l in tr_box:
-                    parseLine(l)
-                print(len(pages), " pages left to analyze.")
+                if len(tr_box) != 0:
+                    for l in tr_box:
+                        parseLine(l)
+                    print("- step n°2 done [parseLine]")
+
+                print("- step n°3 done [get_data]")
+                print("### ", len(pages), " pages left ###")
                 pages.remove(i)
 
-            except requests.Timeout as err:
-                lock = 0
             except:
-                print(err.message)
+                print("- Proxy time out")
+                lock = 0
 
     return df
 
 def launcher(proxies):
-    token0 = ["http://nntime.com/proxy-list-", 7, 1, 1]
-    token1 = ["https://hidemy.name/fr/proxy-list/?start=", 1280, 64, 0] ###CLOUDFLARE PROTECTION###
-    token2 = ["https://www.ip-adress.com/proxy-list", 1, 1, 0]
-    token3 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1, 0] ###CAPTCHAT###
+    token0 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "odd"]]
+    token1 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "even"]]
 
-    tokens = [token0]
-    for tok in range(0, len(tokens)):
+    token2 = ["https://hidemy.name/fr/proxy-list/?start=", 1280, 64, 0, ["tr",""]] ###CLOUDFLARE PROTECTION###
+    token3 = ["https://www.ip-adress.com/proxy-list", 1, 1, 0, ["tr",""]]
+    token4 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1, 0, ["tr",""]] ###CAPTCHAT###
 
-        get_data(get_pages(tokens[tok]),proxies)
+    tokens = [token0, token1]
+    for tok in tokens:
+        get_data(get_pages(tok), proxies, tok[4])
 
 def main():
     proxies = pd.read_csv('Proxy_List.txt', header = None)
