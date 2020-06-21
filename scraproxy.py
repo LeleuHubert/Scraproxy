@@ -43,23 +43,26 @@ def get_data(pages, proxies, pattern):
             df_f = pd.DataFrame()
             if lock < 1:
                 proxy = next(proxy_pool)
-                print("\n( ", proxy, " ) :")
             try:
                 soup = connector(i, proxy, ua)
+                print("\n( ", proxy, " ) .", end=" ")
                 lock = 1
-                tr_box = soup.find_all(pattern[0], {"class":pattern[1]})
+                if pattern[1] != "null":
+                    tr_box = soup.find_all(pattern[0], {"class":pattern[1]})
+                else:
+                    tr_box = soup.find_all("tr")
 
                 if len(tr_box) != 0:
                     for l in tr_box:
                         parseLine(l)
                 else:
-                    print("Error: ", len(tr_box), " ellement found")
+                    print("Alert: ", len(tr_box), " element found")
 
                 print("- ", len(pages), " pages left")
                 pages.remove(i)
 
             except:
-                print("- Proxy time out")
+                print(" .", end=" ")
                 lock = 0
 
     return df
@@ -67,12 +70,13 @@ def get_data(pages, proxies, pattern):
 def launcher(proxies):
     token0 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "odd"]]
     token1 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "even"]]
+    token2 = ["https://hidemy.name/en/proxy-list/?start=", 128, 64, 0, ["tr","null"]] ###CLOUDFLARE PROTECTION###
 
-    token2 = ["https://hidemy.name/fr/proxy-list/?start=", 1280, 64, 0, ["tr",""]] ###CLOUDFLARE PROTECTION###
-    token3 = ["https://www.ip-adress.com/proxy-list", 1, 1, 0, ["tr",""]]
-    token4 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1, 0, ["tr",""]] ###CAPTCHAT###
+    token3 = ["https://www.ip-adress.com/proxy-list", 1, 1, 0, ["tr","null"]]
+    token4 = ["http://free-proxy.cz/en/proxylist/main/", 150, 1, 0, ["tr","null"]] ###CAPTCHAT###
+    token5 = ["https://www.proxynova.com/proxy-server-list/anonymous-proxies/", 1, 1, 0, ["tr", "data-proxy-id"]]
 
-    tokens = [token0, token1]
+    tokens = [token2]
     for tok in tokens:
         get_data(get_pages(tok), proxies, tok[4])
 
@@ -83,7 +87,7 @@ def main():
 
     print("Scraproxy is starting")
     launcher(proxies)
-    print("Scraproxy's over")
+    print("- - - - - FINISH - - - - -")
 
 if __name__== "__main__":
   main()
