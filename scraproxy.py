@@ -26,50 +26,45 @@ def parseLine(line):
         for elem in stock:
             file.write('%s\n' % elem)
 
-def connector(i, proxy, ua):
+def connector(i, proxy, ua, pattern):
     scraper = cloudscraper.create_scraper()
     response = scraper.get(i, proxies={"http": proxy, "https": proxy}, headers={'User-Agent': ua.random}, timeout=5)
     time.sleep(random.randrange(1,4))
-    return bs4.BeautifulSoup(response.text, 'html.parser')
+    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+    if pattern[1] != "null":
+        return soup.find_all(pattern[0], {"class":pattern[1]})
+    else:
+        return soup.find_all("tr")
 
 def get_data(pages, proxies, pattern):
     df = pd.DataFrame()
     ua = UserAgent()
     proxy_pool = it.cycle(proxies)
     lock = -1
-
+    print("please wait few second")
     while len(pages) > 0:
         for i in pages:
             df_f = pd.DataFrame()
             if lock < 1:
                 proxy = next(proxy_pool)
             try:
-                soup = connector(i, proxy, ua)
-                print("\n( ", proxy, " ) .", end=" ")
                 lock = 1
-                if pattern[1] != "null":
-                    tr_box = soup.find_all(pattern[0], {"class":pattern[1]})
-                else:
-                    tr_box = soup.find_all("tr")
+                tr_box = connector(i, proxy, ua, pattern)
 
                 if len(tr_box) != 0:
                     for l in tr_box:
                         parseLine(l)
+                    pages.remove(i)
                 else:
                     print("Alert: ", len(tr_box), " element found")
-
-                print("- ", len(pages), " pages left")
-                pages.remove(i)
-
             except:
-                print(" .", end=" ")
                 lock = 0
 
     return df
 
 def launcher(proxies):
-    token0 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "odd"]]
-    token1 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "even"]]
+    token0 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "odd"]] ### pas de port indiqué ###
+    token1 = ["http://nntime.com/proxy-list-", 7, 1, 1, ["tr", "even"]] ### pas de port indiqué ###
     token2 = ["https://hidemy.name/en/proxy-list/?start=", 128, 64, 0, ["tr","null"]] ###CLOUDFLARE PROTECTION###
 
     token3 = ["https://www.ip-adress.com/proxy-list", 1, 1, 0, ["tr","null"]]
@@ -85,7 +80,7 @@ def main():
     proxies = proxies.values.tolist()
     proxies = list(it.chain.from_iterable(proxies))
 
-    print("Scraproxy is starting")
+    print("Scraproxy is starting\n->", end=" ")
     launcher(proxies)
     print("- - - - - FINISH - - - - -")
 
