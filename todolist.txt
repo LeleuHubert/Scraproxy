@@ -1,0 +1,21 @@
+install pip3
+  > sudo apt install python3-pip
+
+install pandas
+  > pip3 install wheel
+  > pip3 install pandas
+
+install BS4
+  > pip3 install BeautifulSoup4
+
+install fake_useragent
+  > sudo apt-get install gcc libyaml-dev libpython2.7-dev
+  > pip3 install pyyaml ua-parser user-agents fake-useragent
+
+install cloudscraper
+  > pip3 install cloudscraper
+
+
+
+
+https://www.proxy-list.download/HTTP
