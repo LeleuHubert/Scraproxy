@@ -1,21 +1,42 @@
-import requests, traceback
+import requests, traceback, cloudscraper
 from lxml.html import fromstring
 from itertools import cycle
 
-def get_infoFrom(url, key):
-    response = requests.get(url)
-    parser = fromstring(response.text)
-    proxies = set()
-    for i in parser.xpath('//tbody/tr')[:1000]:
+def next_page(url, info):
+    pages = []
+
+    for i in range(1, info[0]+1, info[1]):
+        if info[2] == 0:
+            j = url + str(i)
+        elif info[2] == 1:
+            j = url + "0" + str(i) + ".htm"
+        pages.append(j)
+
+    return pages
+
+def get_info(parser, proxies, key):
+    for i in parser.xpath('//tbody/tr')[:30]:
         if i.xpath('.//td[7][contains(text(),"yes")]') and key == 0:
             proxy = ";".join(["https",i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
             proxies.add(proxy)
         elif i.xpath('.//td[7][contains(text(),"no")]') and key == 0:
             proxy = ";".join(["http",i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
             proxies.add(proxy)
-        elif i.xpath('.//td[7][contains(text(),"Yes")]') and key == 1:
-            proxy = ";".join([i.xpath('.//td[5]/text()')[0],i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
+        elif key == 1:
+            proxy = ";".join([i.xpath('.//td[5]/text()')[0], i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
             proxies.add(proxy)
+        elif key == 2: #type proxy doublons sur la ligne
+            if i.xpath('.//td[5]/text()')[0].find(", ") == -1:
+                proxy = ";".join([i.xpath('.//td[5]/text()')[0], i.xpath('.//td[1]/text()')[0], i.xpath(".//td[2]/text()")[0]])
+                proxies.add(proxy)
+    return proxies
+
+def get_infoFrom(url, key):
+    scraper = cloudscraper.create_scraper()
+    response = scraper.get(url)
+    parser = fromstring(response.text)
+    proxies = set()
+    proxies = get_info(parser, proxies, key)
     return proxies
 
 def launcher():
@@ -23,12 +44,15 @@ def launcher():
         for elem in get_infoFrom("https://free-proxy-list.net/", 0):
             file.write('%s\n' % elem)
         for elem in get_infoFrom("https://www.socks-proxy.net/", 1):
-            file.write('%s\n' % elem)
-
-
+              file.write('%s\n' % elem)
+        for page in next_page("https://hidemy.name/en/proxy-list/?start=", [1216,64,0]):
+            for elem in get_infoFrom(page, 2):
+                file.write('%s\n' % elem)
 
 def main():
+    print("-> Scraproxy has started")
     launcher()
+    print("-> Scraproxy's over")
 
 if __name__== "__main__":
   main()
