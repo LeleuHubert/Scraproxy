@@ -18,4 +18,11 @@ install cloudscraper
 
 
 
-https://www.proxy-list.download/HTTP
+
+
+  https://hidemy.name/en/proxy-list/?start=                           ###CLOUDFLARE PROTECTION###
+  https://www.ip-adress.com/proxy-list
+  http://free-proxy.cz/en/proxylist/main/                             ###CAPTCHAT###
+  https://www.proxynova.com/proxy-server-list/anonymous-proxies/      ### ip;port ###
+  http://nntime.com                                                   ### ip;port ###
+  https://www.proxy-list.download/HTTP                                ### Download ###
