@@ -75,7 +75,6 @@ def cleaner(proxies, key):
 
 def tester(proxies, ip, ref_IPs):
     whitelist = []
-    eject = 0
     proxy_pool = cycle(proxies)
 
     for i in range(1, len(proxies)):
@@ -83,8 +82,8 @@ def tester(proxies, ip, ref_IPs):
         print("                          ", end="\r")
         print("- please wait ", len(proxies)-i, end="\r")
         try:
-            rep = requests.get("http://ifconfig.me/ip", proxies={"http": proxy, "https": proxy}, timeout=1, allow_redirects=False)
-            if rep.text == ip:
+            rep = requests.get("http://ifconfig.me/ip", proxies={"http": proxy, "https": proxy}, timeout=1)
+            if rep.status_code == 200:
                 whitelist.append(ref_IPs[i])
         except:
             pass
@@ -103,9 +102,9 @@ def launcher(nbr):
             list_IPs.append(elem)
         for elem in get_infoFrom("https://www.socks-proxy.net/", 1, nbr):
             list_IPs.append(elem)
-        # for page in next_page("https://hidemy.name/en/proxy-list/?start=", [1216,64,0]):
-        #     for elem in get_infoFrom(page, 2, nbr):
-        #         list_IPs.append(elem)
+        for page in next_page("https://hidemy.name/en/proxy-list/?start=", [576,64,0]):
+            for elem in get_infoFrom(page, 2, nbr):
+                list_IPs.append(elem)
         with open('list.csv', 'w') as fp:
             for ipline in list_IPs:
                 fp.write('%s\n' % ipline)
