@@ -70,6 +70,8 @@ def cleaner(proxies, key):
         proxies = [proxy.lower() for proxy in proxies]
         proxies = [proxy.replace('socks4;//', 'socks4;') for proxy in proxies]
         proxies = [proxy.replace('socks5;//', 'socks5;') for proxy in proxies]
+    elif key == 2:
+        proxies = [proxy.lower() for proxy in proxies]
 
     return proxies
 
@@ -105,6 +107,7 @@ def launcher(nbr):
         for page in next_page("https://hidemy.name/en/proxy-list/?start=", [576,64,0]):
             for elem in get_infoFrom(page, 2, nbr):
                 list_IPs.append(elem)
+        list_IPs = cleaner(list_IPs, 2)
         with open('list.csv', 'w') as fp:
             for ipline in list_IPs:
                 fp.write('%s\n' % ipline)
