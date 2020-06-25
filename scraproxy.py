@@ -1,4 +1,5 @@
 import requests, traceback, cloudscraper, re, sys
+from requests.exceptions import ProxyError, Timeout, InvalidProxyURL
 from lxml.html import fromstring
 from itertools import cycle
 
@@ -6,7 +7,7 @@ def areyouconnected():
     try:
         rep = requests.get("http://ifconfig.me/ip")
         if rep:
-            print("-> Scraproxy has started with IP [ ", rep.text, " ]")
+            print("[",  rep.text, "] -> Scraproxy has started")
             return rep.text
         else:
             print("You don't seem to be connected to the internet.")
@@ -74,18 +75,19 @@ def cleaner(proxies, key):
 
 def tester(proxies, ip, ref_IPs):
     whitelist = []
-
+    eject = 0
     proxy_pool = cycle(proxies)
 
     for i in range(1, len(proxies)):
         proxy = next(proxy_pool)
-        print(proxy)
+        print("                          ", end="\r")
+        print("- please wait ", len(proxies)-i, end="\r")
         try:
-            response = requests.get("http://ifconfig.me/ip" , proxies={"http": proxy, "https": proxy}, timeout=1)
+            rep = requests.get("http://ifconfig.me/ip", proxies={"http": proxy, "https": proxy}, timeout=1, allow_redirects=False)
             if rep.text == ip:
-                whitelist.append(ref_IPs[proxy])
+                whitelist.append(ref_IPs[i])
         except:
-            print("Skipping. Connnection error")
+            pass
 
     fileCreator(cleaner(whitelist, 1))
 
@@ -101,17 +103,16 @@ def launcher(nbr):
             list_IPs.append(elem)
         for elem in get_infoFrom("https://www.socks-proxy.net/", 1, nbr):
             list_IPs.append(elem)
-        for page in next_page("https://hidemy.name/en/proxy-list/?start=", [1216,64,0]):
-            for elem in get_infoFrom(page, 2, nbr):
-                list_IPs.append(elem)
+        # for page in next_page("https://hidemy.name/en/proxy-list/?start=", [1216,64,0]):
+        #     for elem in get_infoFrom(page, 2, nbr):
+        #         list_IPs.append(elem)
         with open('list.csv', 'w') as fp:
             for ipline in list_IPs:
                 fp.write('%s\n' % ipline)
                 good_IP.append(ipline)
-        print("- step n°1 done\n- step n°2 start    (testing)")
+        print("- step n°2 start    (testing)")
         list_IPs = good_IP
         tester(cleaner(good_IP, 0), ip, list_IPs)
-        print("- step n°2 done")
     else:
         print("- end of execution of Scraproxy")
 
@@ -122,4 +123,4 @@ if __name__ == "__main__":
     else:
         launcher(100)
 
-    print("-> Scraproxy's over")
+    print("----> Scraproxy's over")
