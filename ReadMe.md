@@ -64,6 +64,4 @@ Objective 2: Once this proxy list has been built, you are asked to
             And we'll go run a "cat working.csv" at the place where you
             will have saved the file in the container.
 
-            Translated with www.DeepL.com/Translator (free version)
-
 Deadline: 10 days
