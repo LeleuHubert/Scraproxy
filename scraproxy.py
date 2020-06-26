@@ -134,6 +134,11 @@ if __name__ == "__main__":
                 os.remove("list.csv")
                 os.remove("working.csv")
                 print("list.csv and working.csv are deleted")
+            elif flag == "-startonly":
+                launcher(20)
+            elif flag == "-startandshow":
+                launcher(20)
+                showFiles()
             else:
                 print("Usage : sudo docker run scraproxy -clean")
         elif len(sys.argv) == 3:

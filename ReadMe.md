@@ -1,51 +1,74 @@
-﻿Sujet: Scrappeur et testeur de proxy ouvert socks4/socks5/HTTPS
+Design of a scrapper and proxies tester as a Proof of Proficiency test requested by a company.
 
-Objectif 1: Il vous est demandé d'écrire un scrappeur qui va récupérer
-            une liste de proxy socks4/socks5/HTTPS. Il existe des sites
-            qui listent les proxy ouverts :
+----------- WITHOUT-DOCKER -----------
+
+USAGE : python3 scraproxy.py [FLAG (optional)] [NBR (optional)]
+
+FLAGS :
+  [-clean]        : delete list.csv and working.csv
+  [-startandshow] : run scraproxy and display list.csv and working.csv at the end (could work with or without [NBR])
+  [-startonly]    : run scraproxy with or without [NBR]
+
+----------- WITH-DOCKER -----------
+
+RUN   :  sudo docker build -t scraproxy [PATH to DOCKERFILE]
+
+USAGE : sudo docker run scraproxy [FLAG (optional)] [NBR (optional)]
+
+FLAGS :
+  [-clean]        : delete list.csv and working.csv
+  [-startandshow] : run scraproxy and display list.csv and working.csv at the end (could work with or without [NBR])
+  [-startonly]    : run scraproxy with or without [NBR]
+
+-----------------------------------
+
+Objective 1: You are asked to write a scrapper that will retrieve
+            a list of proxy socks4/socks5/HTTP/HTTPS. There are sites
+            that list open proxies:
               https://hidemy.name/en/proxy-list
               https://proxyscrape.com/free-proxy-list
               http://free-proxy.cz/en/proxylist
 
-            La liste des proxy doit être écrite dans un fichier "list.csv"
-            au format: TYPE_PROXY;IP;PORT
-            par exemple: "socks4;1.1.1.1;4578"
+            The list of proxies must be written in a "list.csv" file.
+            in the format: PROXY_TYPE;IP;PORT
+            for example: "socks4;1.1.1.1.1;4578".
 
 
-Objectif 2: Une fois cette liste de proxy construite, il vous est demandé de
-            les tester et de construire une deuxième liste dans un fichier
-            "working.csv" ayant le même format que le fichier "list.csv".
+Objective 2: Once this proxy list has been built, you are asked to
+            test them and build a second list in a
+            "working.csv" having the same format as the "list.csv" file.
 
-            Le fichier "working.csv" ne contiendra donc que des proxy fonctionnels.
-            Par exemple en bash "curl --socks4 IP:PORT https://ipinfo.io" doit
-            retourner l'IP du proxy testé.
+            The "working.csv" file will therefore only contain functional proxies.
+            For example in bash "curl --socks4 IP:PORT https://ipinfo.io" must
+            return the IP of the proxy being tested.
 
-Prérequis:
+            Prerequisite:
 
-* Utiliser le langage de votre choix (Java/Python/Go/C/C++/C#/Rust)
+            * Use the language of your choice (Java/Python/Go/C/C++/C#/Rust)
 
-* Utiliser docker ou podman
+            * Use docker or podman
 
-* Bonus: Penser au principe du moindre privilège qui s'applique aux conteneurs.
+            * Bonus: Think of the principle of least privilege that applies to containers.
 
-Livrables:
+            Deliverable:
 
-* Un Dockerfile avec le(s) script(s)/source(s)/programme(s) qui rempli les
-  objectifs (dans un zip ou un tar.gz)
+            * A Dockerfile with the script(s)/source(s)/program(s) that fills the
+              objectives (in a zip or tar.gz)
 
-* Compte rendu expliquant votre cheminement, les points bloquants et les points
-  forts de votre réalisation (en PDF)
+            * Report explaining your path, the blocking points and the points
+              strong of your realization (in PDF)
 
-Vérification:
+            Checking:
 
-Pour vérifier nous ferons les commandes suivantes:
+            To verify we will make the following orders:
 
-    docker build ... && docker run ...
-    OU
-    podman build ... && podman run ...
+                docker build... && docker run ...
+                OR
+                podman build ... && podman run ...
 
-Et nous irons exécuter un "cat working.csv" à l'endroit où vous
-aurez sauvegardé le fichier dans le conteneur.
+            And we'll go run a "cat working.csv" at the place where you
+            will have saved the file in the container.
 
-Deadline:
-29/06/2020 à 09h00
+            Translated with www.DeepL.com/Translator (free version)
+
+Deadline: 10 days
