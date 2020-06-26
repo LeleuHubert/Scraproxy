@@ -1,5 +1,4 @@
-import requests, traceback, cloudscraper, re, sys
-from requests.exceptions import ProxyError, Timeout, InvalidProxyURL
+import requests, traceback, cloudscraper, re, sys, os
 from lxml.html import fromstring
 from itertools import cycle
 
@@ -92,6 +91,14 @@ def tester(proxies, ip, ref_IPs):
 
     fileCreator(cleaner(whitelist, 1))
 
+def showFiles():
+    print("-------------- LIST.CSV FILE --------------")
+    with open("list.csv", "r") as list:
+	       print(list.read())
+    print("-------------- WORKING.CSV FILE --------------")
+    with open("working.csv", "r") as list2:
+	       print(list2.read())
+
 def launcher(nbr):
     ip = areyouconnected()
     list_IPs = []
@@ -104,9 +111,9 @@ def launcher(nbr):
             list_IPs.append(elem)
         for elem in get_infoFrom("https://www.socks-proxy.net/", 1, nbr):
             list_IPs.append(elem)
-        for page in next_page("https://hidemy.name/en/proxy-list/?start=", [576,64,0]):
-            for elem in get_infoFrom(page, 2, nbr):
-                list_IPs.append(elem)
+        # for page in next_page("https://hidemy.name/en/proxy-list/?start=", [576,64,0]):
+        #     for elem in get_infoFrom(page, 2, nbr):
+        #         list_IPs.append(elem)
         list_IPs = cleaner(list_IPs, 2)
         with open('list.csv', 'w') as fp:
             for ipline in list_IPs:
@@ -119,10 +126,25 @@ def launcher(nbr):
         print("- end of execution of Scraproxy")
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        a = int(sys.argv[1])
-        launcher(a)
+
+    if len(sys.argv) > 1:
+        flag = ''.join(sys.argv[1])
+        if len(sys.argv) == 2:
+            if flag == "-clean":
+                os.remove("list.csv")
+                os.remove("working.csv")
+                print("list.csv and working.csv are deleted")
+            else:
+                print("Usage : sudo docker run scraproxy -clean")
+        elif len(sys.argv) == 3:
+            if flag == "-startonly":
+                launcher(int(sys.argv[2]))
+            elif flag == "-startandshow":
+                launcher(int(sys.argv[2]))
+                showFiles()
+            else:
+                print("Usage : sudo docker run scraproxy -start [nbr < 50]")
     else:
-        launcher(100)
+        launcher(20)
 
     print("----> Scraproxy's over")
