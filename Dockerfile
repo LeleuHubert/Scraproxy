@@ -10,4 +10,4 @@ apt-get update
 WORKDIR home/
 RUN git clone https://github.com/LeleuHubert/Scraproxy.git
 
-CMD [ "python3", "-u", "./Scraproxy/scraproxy.py" ]
+CMD [ "python3", "-u", "./Scraproxy/scraproxy.py", "(flag)"]
