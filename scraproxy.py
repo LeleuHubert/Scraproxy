@@ -151,5 +151,6 @@ if __name__ == "__main__":
                 print("Usage : sudo docker run scraproxy -start [nbr < 50]")
     else:
         launcher(20)
+        showFiles()
 
     print("----> Scraproxy's over")
