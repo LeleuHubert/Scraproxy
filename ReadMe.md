@@ -13,7 +13,13 @@ FLAGS :
 
 BUILD   :   sudo docker build -t scraproxy [PATH to DOCKERFILE]
 
-RUN     :   sudo docker run scraproxy
+RUN     :   sudo docker run scraproxy [FLAG (optional)]
+
+FLAGS :
+  [-clean]        : delete list.csv and working.csv
+  [-startandshow] : run scraproxy and display list.csv and working.csv at the end (could work with or without [NBR])
+  [-startonly]    : run scraproxy with or without [NBR]
+
 
 -----------------------------------
 
